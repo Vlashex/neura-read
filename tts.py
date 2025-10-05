@@ -54,6 +54,12 @@ def synthesize(text: str, tokenizer, model, device):
 # ----------------------------
 # HTTP-endpoint
 # ----------------------------
+import os
+import time
+import io
+import soundfile as sf
+from flask import Flask, request, jsonify, send_file
+
 @app.route("/tts", methods=["POST"])
 def tts_route():
     data = request.get_json()
@@ -66,10 +72,26 @@ def tts_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+    # --- подготовка пути для сохранения ---
+    os.makedirs("/app/output", exist_ok=True)
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    out_path = f"/app/output/tts_{timestamp}.wav"
+
+    # --- сохраняем на диск ---
+    sf.write(out_path, waveform.numpy(), sr)
+    print(f"[OK] Сохранено в {out_path}")
+
+    # --- готовим буфер для ответа ---
     buf = io.BytesIO()
     sf.write(buf, waveform.numpy(), sr, format="WAV")
     buf.seek(0)
-    return send_file(buf, mimetype="audio/wav", as_attachment=False, download_name="tts.wav")
+
+    return send_file(
+        buf,
+        mimetype="audio/wav",
+        as_attachment=False,
+        download_name="tts.wav",
+    )
 
 # ----------------------------
 # CLI-режим
