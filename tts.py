@@ -8,24 +8,24 @@ import io
 
 app = Flask(__name__)
 
-def load_model(model_name="facebook/mms-tts-rus", device=None, use_fp16=True):
+def load_model(model_name="facebook/mms-tts-rus", device=None):
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = VitsModel.from_pretrained(model_name)
-    model = model.to(device)
+    model = VitsModel.from_pretrained(model_name).to(device)
     model.eval()
     return tokenizer, model, device
 
 
+
 @torch.inference_mode()
-def synthesize(text, tokenizer, model, device, use_fp16=True):
+def synthesize(text: str, tokenizer, model, device):
     inputs = tokenizer(text, return_tensors="pt").to(device)
-    with torch.cuda.amp.autocast(enabled=use_fp16 and device.type == "cuda"):
-        out = model(**inputs)
+    out = model(**inputs)
     waveform = out.waveform.cpu().squeeze(0)
     sr = getattr(model.config, "sampling_rate", 16000)
     return waveform, sr
+
 
 
 @app.route("/tts", methods=["POST"])
