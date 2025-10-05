@@ -14,12 +14,12 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
       HF_HOME: /app/hf_cache
-      TRANSFORMERS_CACHE: /app/hf_cache
       TORCH_CUDA_ARCH_LIST: "7.5"
-      FP16: "1"
     volumes:
-      - ./hf_cache:/app/hf_cache
-      - ./output:/app/output
+      - ./hf_cache:/app/hf_cache          
+      - ./pip_cache:/root/.cache/pip      
+      - ./output:/app/output              
+      - ./tts.py:/app/tts.py:ro           
     deploy:
       resources:
         reservations:
