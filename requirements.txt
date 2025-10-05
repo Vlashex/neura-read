@@ -1,0 +1,8 @@
+torch==2.4.0+cu124
+torchaudio==2.4.0+cu124
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+transformers>=4.43.0
+accelerate>=0.32.0
+soundfile
+flask
